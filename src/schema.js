@@ -1,7 +1,13 @@
- const typeDefs=
+ const typeDefs=[
  `
    type Query{
       logout:String!
+      getPostForEdit(id:String!):Post!
+      getUserForEdit(id:String!):GetUser!
+      getPermission(resourceName:String!):Permission!
+      getUsers(page:Int!):[String!]!
+      getUserPost(page:Int!):String!
+      getPost(page:Int!):String!
     }
    input RegisterInput{
       name:String!
@@ -26,6 +32,11 @@
      password:String!
      roleId:String!
    }
+   type GetUser{
+    name:String!
+    email:String!
+    password:String!
+   }
    type RefsToken{
      accToken:String!
      refToken:String!
@@ -36,9 +47,15 @@
       email:String
       password:String
    }
-   type AddPost{
+   type Post{
     title:String!
     discription:String!
+   }
+   type Permission{
+     read:Boolean!
+     write:Boolean!
+     update:Boolean!
+     delete:Boolean!
    }
    type Mutation{
      register(registerInput:RegisterInput):User!
@@ -49,7 +66,9 @@
      addUser(registerInput:RegisterInput):User!
      deleteUser(id:String!):String!
      updateUser(updateUserInput:UpdateUserInput):String!
-     addPost(title:String!,discription:String!):AddPost
+     addPost(title:String!,discription:String!):Post!
+     deletePost(id:String!):String!
+     updatePost(id:String!,title:String!,discription:String!):String!
    }
- `
+ `]
  export default typeDefs

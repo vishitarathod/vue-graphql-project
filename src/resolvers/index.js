@@ -4,8 +4,8 @@ import authResolvers from './Auth.js'
 
 export default {
     Query:{
-    //     // ...userResolvers.Query,
-    //     // ...postResolvers.Query,
+        ...userResolvers.Query,
+        ...postResolvers.Query,
         ...authResolvers.Query
     },
     Mutation:{

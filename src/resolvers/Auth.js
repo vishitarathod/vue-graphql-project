@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt'
 import { verifyPassword } from '../helper/verifyPassword.js'
 import { decodeToken, signAccessToken ,signReferesToken ,verifyAccessToken, veifyRefreshToken} from '../helper/jwt.js'
 import { mailSend } from '../helper/mail.js'
+import validate from '../validation/validate.js'
 
 export default{
     Query:{
@@ -12,6 +13,9 @@ export default{
     Mutation:{
         //user registration
        async register(parent,{registerInput:{name,email,password,roleName}},{prisma},info){
+          //validate data
+          const data= await validate.validateRegisterUser(name,email,password,roleName)
+          console.log(data);
            try {
             //cheack for email is alreday register or not
             const isEmailExist= await prisma.user.findFirst({
@@ -53,6 +57,8 @@ export default{
         },
 
         async login(parent,{loginInput:{email,password}},{prisma},info){
+            //validate data
+            const data= await validate.validateLoginUser(email,password)
             try {
             //check for email is register or not
             const isUserExist= await prisma.user.findFirst({
@@ -88,6 +94,8 @@ export default{
         },
         //forgot password
         async forgotPassword(parent,{email},{prisma},info){
+            //verify token
+            const data= await verifyAccessToken(context)
             try {
             //cheack for email is register or not
             const isUserExist= await prisma.user.findFirst({
@@ -112,6 +120,8 @@ export default{
         },
         //reset password
         async resetPassword(parent,{token,password},{prisma},info){
+            //verify token
+            const data= await verifyAccessToken(context)
             try {
                 //check for valid user
                 const user=await decodeToken(token)
@@ -134,6 +144,7 @@ export default{
 
         //refreshtoken validation and generate new tokens
        async refreshToken(parent,{token},context,info){
+           //verify token
             const data= await verifyAccessToken(context)
             try {
                 //verify refresh token
