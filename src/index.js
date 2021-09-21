@@ -15,13 +15,13 @@ const { PrismaClient } = pkg;
   const schema= makeExecutableSchema({typeDefs,resolvers})
   const httpServer = http.createServer(app);
   const server = new ApolloServer({
-    schema:applyMiddleware(schema,permission),
-    // typeDefs,
-    // resolvers,
+    // schema:applyMiddleware(schema,permission),
+    typeDefs,
+    resolvers,
     context:({req})=>({req,prisma}),
     plugins: [ApolloServerPluginLandingPageGraphQLPlayground({ httpServer })],
   });
   await server.start();
-  server.applyMiddleware({ app });
+  server.applyMiddleware({ app,permission });
   await new Promise(resolve => httpServer.listen({ port: 4000 }, resolve));
   console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`);

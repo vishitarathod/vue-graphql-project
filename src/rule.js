@@ -4,7 +4,7 @@ export const rules={
     isAuthenticated : rule({ cache: 'contextual' })(
         async (parent, args, ctx, info) => {
         //   return ctx.user !== null
-    
+          console.log("is authenticated....")
         //   const header = ctx.req.headers.authorization
         const header = ctx.req.get('Authorization')
     
@@ -32,7 +32,7 @@ export const rules={
     Query: {},
     // Query: allow,
     Mutation:{
-        // deleteUser:rules.isAuthenticated,
+        deleteUser:rules.isAuthenticated,
     }
   }
   )

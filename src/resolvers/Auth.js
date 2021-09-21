@@ -8,6 +8,9 @@ export default{
     Query:{
         logout(){
             return "logout successfully"
+        },
+        hello(){
+            return "hellllooooo....... welcome....."
         }
     },
     Mutation:{

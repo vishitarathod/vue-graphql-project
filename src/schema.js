@@ -1,6 +1,7 @@
  const typeDefs=[
  `
    type Query{
+     hello:String!
       logout:String!
       getPostForEdit(id:String!):Post!
       getUserForEdit(id:String!):GetUser!
