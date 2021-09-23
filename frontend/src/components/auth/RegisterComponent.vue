@@ -19,14 +19,14 @@
     </select>
     <p class="error" v-if="error!=''">{{error}}</p>
   <div>
-      <!-- <button type="button" @click="register()">Register</button> -->
-      <base-button @click.prevent="register()">Register</base-button>
+      <button type="button" @click.prevent="register()">Register</button>
+      <!-- <base-button @click.prevent="register()">Register</base-button> -->
   </div>
     </form>
 </div>
 </template>
 <script>
-// import { mapActions ,mapMutations} from "vuex";
+
 export default {
   data() {
     return {
@@ -37,39 +37,25 @@ export default {
       error:'',
     };
   },
-  // computed: {
-  //   ...mapGetters("register", {
-  //     getRegisterApi: "getRegisterApi",
-  //   }),
-  // },
   methods: {
-    // ...mapActions("register", {
-    //   actionRegisterApi: "registerApi",
-    // }),
-    // ...mapMutations("auth", {
-    //   setLoading: "setLoading",
-    // }),
     //register
     async register() {
-      // console.log(this.email, this.password);
-     this.$store.commit('setLoading',true)
-      const payload = {
+      try {
+        this.$store.commit('setLoading',true)
+        const payload = {
         name:this.name,
         email: this.email,
         password: this.password,
         roleId:this.roleId
       };
-      this.$store.dispatch('registerApi',{value:payload})
-      .then(()=>{
-        // console.log(res)
-       this.$store.commit('setLoading',false)
+      await this.$store.dispatch('registerApi',payload)
+      
        return this.$router.push('/login')
-      })
-      .catch((error)=>{
-       this.$store.commit('setLoading',false)
-        console.log(error.response)
-        this.error=error.response.data.error.details[0].message
-      })
+      } catch (error) {
+        this.$store.commit('setLoading',false)
+        console.log("error")
+        this.error=error
+      }
     },
   },
 };

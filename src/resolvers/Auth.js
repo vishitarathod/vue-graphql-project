@@ -18,7 +18,7 @@ export default{
        async register(parent,{registerInput:{name,email,password,roleName}},{prisma},info){
           //validate data
           const data= await validate.validateRegisterUser(name,email,password,roleName)
-          console.log(data);
+        //   console.log(data);
            try {
             //cheack for email is alreday register or not
             const isEmailExist= await prisma.user.findFirst({
@@ -55,7 +55,7 @@ export default{
                })
              return savedUser;
            } catch (e) {
-               return e
+              return e
            }
         },
 

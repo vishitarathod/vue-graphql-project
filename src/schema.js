@@ -1,5 +1,6 @@
- const typeDefs=[
- `
+import { gql } from "apollo-server-core"
+
+ const typeDefs=gql`
    type Query{
      hello:String!
       logout:String!
@@ -71,5 +72,5 @@
      deletePost(id:String!):String!
      updatePost(id:String!,title:String!,discription:String!):String!
    }
- `]
+ `
  export default typeDefs

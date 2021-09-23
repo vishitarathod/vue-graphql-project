@@ -32,9 +32,9 @@ class Validator {
       });
       
       const value = await schema.validateAsync({name,email,password,roleName});
-      console.log(value)
+      // console.log(value)
     } catch (e) {
-      console.log(e)
+      // console.log(e.)
       throw new Error(e.details[0].message)
     }
   };

@@ -1,6 +1,6 @@
 import { rule, shield, and, or, not, allow } from 'graphql-shield'
 import JWT from 'jsonwebtoken'
-export const rules={
+ const rules={
     isAuthenticated : rule({ cache: 'contextual' })(
         async (parent, args, ctx, info) => {
         //   return ctx.user !== null
@@ -21,20 +21,23 @@ export const rules={
            }
               throw new Error('Authentication required')
           }
-      
           throw new Error('Authentication header must be provided')
         },
  )
 }
 
 
-  export const permission=shield({
-    Query: {},
+ export const permission=shield({
+    Query: {
+      // hello:rules.isAuthenticated
+    },
     // Query: allow,
     Mutation:{
         deleteUser:rules.isAuthenticated,
     }
   }
   )
-   
   
+  export default function per(){
+    console.log("hellllloooooo");
+  }

@@ -5,6 +5,7 @@ import mutations from './mutations.js'
 import actions from './actions.js'
 
 Vue.use(Vuex)
+
 //create store
 const store = new Vuex.Store({
     state:{
