@@ -7,49 +7,47 @@
 
      <label for="psw"><b>confirm Password</b></label>
     <input type="password" placeholder="Enter confirm Password" name="cpsw" id="cpsw" v-model.trim="cpassword" required>
-   
+   <p class="error" v-if="error!=''">{{error}}</p>
      
-    <!-- <button type="button" @click="reset" >Submit</button> -->
-    <base-button @click="reset()">Reset Password</base-button>
+    <button type="button" @click="reset" >Submit</button>
   
 </form>
 </div>
 </template>
 <script>
-// import axios from 'axios'
-// import {mapMutations } from "vuex";
-import jwtInterceptor from '../../shared/jwt.interceptor'
+import gql from 'graphql-tag'
+import {apolloClient} from '../../vue-apollo'
 export default {
    
     data(){
         return{
             password:'',
             cpassword:'',
+            error:""
         }
     },
     methods:{
-    //       ...mapMutations("auth", {
-    //   setLoading: "setLoading",
-    
-    // }),
-      //reset password
         async reset(){
-          this.$store.commit('setLoading',true)
-        jwtInterceptor.patch('auth/reset',{
-        password:this.password,
-        cpassword:this.cpassword,
-        token:this.$route.params.token
-      })
-      .then((data)=>{
-       this.$store.commit('setLoading',false)
-        console.log(data)
-        this.$router.push('/login')
-      }).catch((error)=>{
-       this.$store.commit('setLoading',false)
-        console.log(error)
-         console.log(error.response)
-        this.error=error.response.data.error.details[0].message
-      })
+       try {
+        await this.$store.commit('setLoading',true)
+        const response= await apolloClient.mutate({
+          mutation: gql`mutation ($token:String!,$password:String!) {
+               resetPassword(token:$token,password:$password)
+          }`,
+          // Parameters
+          variables: {
+            token:this.$route.params.token,
+            password:this.password
+          },
+        })
+        if(response&&response.data){
+         await this.$store.commit('setLoading',false)
+         return this.$router.push('/login')
+        }
+      } catch (error) {
+       await this.$store.commit('setLoading',false)
+        this.error=error.message.split(': ')[1];
+      }
     }
     }
 }

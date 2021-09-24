@@ -9,10 +9,9 @@
       
     <label for="discription"><b>Discription</b></label>
     <input type="text" placeholder="Enter discription" name="discription" id="discription" v-model.trim="discription" required>
-
      <div class="form-group">
-    <!-- <button class="btn btn-danger btn-block" @click="AddPost">Add Post</button> -->
-    <base-button @click.prevent="AddPost()">Add Post</base-button>
+    <button class="btn btn-danger btn-block" @click.prevent="AddPost">Add Post</button>
+    <!-- <base-button @click.prevent="AddPost()">Add Post</base-button> -->
       </div>
   
 </form>
@@ -20,10 +19,8 @@
 </template>
 
 <script>
-// import axios from 'axios'
-import jwtInterceptor from '../../shared/jwt.interceptor'
-// import { mapGetters } from "vuex";
-// import {mapMutations} from "vuex";
+import gql from 'graphql-tag'
+import {apolloClient} from '../../vue-apollo'
 export default {
     data(){
         return{
@@ -32,27 +29,29 @@ export default {
         }
     },
     methods:{
-    //         ...mapMutations("auth", {
-    //   setLoading: "setLoading",
-    
-    // }),
     //add post
     async AddPost(){
-      this.$store.commit('setLoading',true)
-     
-      await jwtInterceptor.post('post/addpost',{
-        // userId:this.getUserID,
-        userId:localStorage.getItem("userId"),
-        title:this.title,
-        discription:this.discription,
-      }).then((data)=>{
-        console.log(data)
-         this.$store.commit('setLoading',false)
+      try {
+        this.$store.commit('setLoading',true)
+        const response= await apolloClient.mutate({
+    
+          mutation: gql`mutation ($title:String!,$discription:String!,$userId:String!) {
+              addPost(title:$title,discription:$discription,userId:$userId)
+          }`,
+          // Parameters
+          variables: {
+              userId:localStorage.getItem("userId"),
+              title:this.title,
+              discription:this.discription,
+          },
+        })
+        if(response&&response.data){
+           this.$store.commit('setLoading',false)
             this.$router.push('/userpost')
-      }).catch((e)=>{
-        console.log(e)
-       this.$store.commit('setLoading',false)
-      })
+        }
+      } catch (error) {
+         this.$store.commit('setLoading',false)
+      }
       }
     }
 }

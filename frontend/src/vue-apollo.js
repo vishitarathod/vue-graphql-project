@@ -1,17 +1,31 @@
 import Vue from 'vue'
 import VueApollo from 'vue-apollo'
 import { createApolloClient, restartWebsockets } from 'vue-cli-plugin-apollo/graphql-client'
-
+import { setContext } from 'apollo-link-context'
 // Install the vue plugin
 Vue.use(VueApollo)
 
 // Name of the localStorage item
-const AUTH_TOKEN = 'apollo-token'
+const jwtaccesstoken = 'jwtaccesstoken'
 
 // Http endpoint
 const httpEndpoint = process.env.VUE_APP_GRAPHQL_HTTP || 'http://localhost:4000/graphql'
 
 // Config
+
+const authLink = setContext(async (_, { headers }) => {
+  // Use your async token function here:
+  
+  const token = localStorage.getItem("jwtaccesstoken")
+  // Return the headers to the context so httpLink can read them
+  console.log(token)
+  return {
+    headers: {
+      ...headers,
+      // authorization: token || ''
+    }
+  }
+})
 const defaultOptions = {
   // You can use `https` for secure connection (recommended in production)
   httpEndpoint,
@@ -19,7 +33,7 @@ const defaultOptions = {
   // Use `null` to disable subscriptions
   wsEndpoint: null,
   // LocalStorage token
-  tokenName: AUTH_TOKEN,
+  tokenName: jwtaccesstoken,
   // Enable Automatic Query persisting with Apollo Engine
   persisting: false,
   // Use websockets for everything (no HTTP)
@@ -28,6 +42,7 @@ const defaultOptions = {
   // Is being rendered on the server?
   ssr: false,
 
+  link: authLink
   // Override default apollo link
   // note: don't override httpLink here, specify httpLink options in the
   // httpLinkOptions property of defaultOptions.
@@ -76,7 +91,7 @@ export function createProvider (options = {}) {
 // Manually call this when user log in
 export async function onLogin (apolloClient, token) {
   if (typeof localStorage !== 'undefined' && token) {
-    localStorage.setItem(AUTH_TOKEN, token)
+    localStorage.setItem(jwtaccesstoken, token)
   }
   if (apolloClient.wsClient) restartWebsockets(apolloClient.wsClient)
   try {
@@ -90,7 +105,7 @@ export async function onLogin (apolloClient, token) {
 // Manually call this when user log out
 export async function onLogout (apolloClient) {
   if (typeof localStorage !== 'undefined') {
-    localStorage.removeItem(AUTH_TOKEN)
+    localStorage.removeItem(jwtaccesstoken)
   }
   if (apolloClient.wsClient) restartWebsockets(apolloClient.wsClient)
   try {

@@ -20,7 +20,6 @@
     <p class="error" v-if="error!=''">{{error}}</p>
   <div>
       <button type="button" @click.prevent="register()">Register</button>
-      <!-- <base-button @click.prevent="register()">Register</base-button> -->
   </div>
     </form>
 </div>
@@ -49,11 +48,8 @@ export default {
         roleId:this.roleId
       };
       await this.$store.dispatch('registerApi',payload)
-      
        return this.$router.push('/login')
       } catch (error) {
-        this.$store.commit('setLoading',false)
-        console.log("error")
         this.error=error
       }
     },

@@ -17,10 +17,10 @@
                     <label>Password</label>
                     <input type="password" class="form-control" v-model="user.password" required>
                 </div>
-
+                 <p class="error" v-if="error!=''">{{error}}</p>
                 <div class="form-group">
                     <!-- <button class="btn btn-danger btn-block">Add</button> -->
-                    <base-button @click.prevent="handleAddUserForm()">Add</base-button>
+                    <button @click.prevent="handleAddUserForm()">Add</button>
                 </div>
             </form>
         </div>
@@ -28,8 +28,8 @@
 </template>
 
 <script>
-import jwtInterceptor from '../../shared/jwt.interceptor'
-// import { mapMutations} from "vuex";
+import gql from 'graphql-tag'
+import {apolloClient} from '../../vue-apollo'
 export default {
     data() {
         return {
@@ -37,29 +37,46 @@ export default {
                 name:'',
                 email:'',
                 password:'',
-                roleId:'6d3475c5-d88c-4aae-af25-664b0420b071'
-            }
+                roleId:'ac916b69-c475-4b2f-bf69-a4066ff12e62'
+            },
+            error:""
         }
     },
     methods: {
-    // ...mapMutations("auth", {
-    //   setLoading: "setLoading",
-    
-    // }),
         //add user
-        handleAddUserForm() {
-           this.$store.commit('setLoading',true)
-         
-            let apiURL = `user/add-user`;
-            jwtInterceptor.post(apiURL, this.user).then((res) => { 
-                console.log("+++++++++++++",res)
-                this.$store.commit('setLoading',false)
-                   this.$router.push('/users')
-                 
-            }).catch(error => {
-                console.log(error)
-                this.$store.commit('setLoading',false)
-            });
+       async handleAddUserForm() {
+         try {
+        this.$store.commit('setLoading',true)
+        const response= await apolloClient.mutate({
+    
+          mutation: gql`mutation ($registerInput: RegisterInput) {
+              addUser(registerInput:$registerInput)
+              {
+                      id
+                      name
+                      email
+                      password
+                      roleId
+              }
+          }`,
+          // Parameters
+          variables: {
+            registerInput:{
+            name:this.user.name,
+            email:this.user.email,
+            password: this.user.password,
+            roleName:this.user.roleId
+            }
+          },
+        })
+        if(response&&response.data){
+           this.$store.commit('setLoading',false)
+            this.$router.push('/users')
+        }
+      } catch (error) {
+         this.$store.commit('setLoading',false)
+         this.error=error.message.split(': ')[1];
+      }
         }
     }
 }

@@ -1,7 +1,7 @@
 import { ApolloServer } from 'apollo-server-express';
 import {ApolloServerPluginLandingPageGraphQLPlayground} from 'apollo-server-core'
 import { makeExecutableSchema } from '@graphql-tools/schema';
-// import { rule, shield, and, or, not, allow } from 'graphql-shield'
+import { rule, shield, and, or, not, allow } from 'graphql-shield'
 import { buildFederatedSchema } from '@apollo/federation';
 import express from 'express';
 import http from 'http';
@@ -15,7 +15,7 @@ const { PrismaClient } = pkg;
   const prisma = new PrismaClient();
   const app = express();
 
-  // const schema = makeExecutableSchema({ typeDefs, resolvers })
+//   const schema = makeExecutableSchema({ typeDefs, resolvers })
 
 // const schemaWithMiddleware = applyMiddleware(
 //   schema,

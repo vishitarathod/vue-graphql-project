@@ -29,11 +29,11 @@
                 </tbody>
             </table>
                <div class="pagination">
-                 <router-link :to="{ query: { page: pager.currentPage - 1 }}" class="page"><i class="fa fa-angle-left"></i></router-link>
+                 <router-link :to="{ query: { page: pager.currentpage - 1 }}" class="page"><i class="fa fa-angle-left"></i></router-link>
 
-                <router-link v-for="index in pager.totalPages" :key="index" :to="{ query: { page: index }}" class="page">{{index}}</router-link>
+                <router-link v-for="index in pager.totalpages" :key="index" :to="{ query: { page: index }}" class="page">{{index}}</router-link>
                  <!-- <a class="page"><i class="fa fa-angle-right"></i></a> -->
-                  <router-link :to="{ query: { page: pager.currentPage + 1 }}" class="page"><i class="fa fa-angle-right"></i></router-link>
+                  <router-link :to="{ query: { page: pager.currentpage + 1 }}" class="page"><i class="fa fa-angle-right"></i></router-link>
             </div>
               </div>
                 <div v-else>
@@ -43,32 +43,53 @@
     </div>
 </template>
 <script>
-// import axios from 'axios'
-import jwtInterceptor from '../../shared/jwt.interceptor'
-// import { mapGetters } from "vuex";
+
+import gql from 'graphql-tag'
+import {apolloClient} from '../../vue-apollo'
 export default {
   data(){
     return{
-    //   posts:[],
        permissions:{},
         pager: {},
-            pageOfItems: [],
+        pageOfItems: [],
     }
   },
     watch: {
         '$route.query.page': {
             immediate: true,
-            handler(page) {
-                const userId=localStorage.getItem("userId")
+           async handler(page) {
+               const userId=localStorage.getItem("userId")
                 page = parseInt(page) || 1;
-                if (page !== this.pager.currentPage) {
-                    jwtInterceptor.post(`post/getuserpost/items?page=${page}`,{userId})
-                        .then((response) => {
-                        console.log(response)
-                         this.pager = response.data.meta
-                            this.pageOfItems = response.data.items
+                if (page !== this.pager.currentpage) {
+                    try {
+                        const response= await apolloClient.query({
+                    
+                        query: gql`query ($page:Int!,$userId:String!) {
+                            getUserPost(page:$page,userId:$userId)
+                            {
+                                currentpage
+                                totalpages
+                                pageOfItems{
+                                id
+                                title
+                                discription
+                                }
                             }
-                        )
+                        }`,
+                        // Parameters
+                        variables: {
+                            page,
+                            userId 
+                        },
+                        })
+                        if(response&&response.data){
+                            this.pager = response.data.getUserPost
+                            this.pageOfItems = response.data.getUserPost.pageOfItems
+                        }
+                    } catch (error) {
+                        console.log(error)
+                        //  this.error=error.message.split(': ')[1];
+                    }
                 }
             }
         },
@@ -76,25 +97,59 @@ export default {
             return this.pageOfItems
         }
     },
-       mounted(){
-        jwtInterceptor.get('user/get-permission?resourceName=Posts')
-        .then((res)=>{
-            console.log("per.........",res.data)
-            this.permissions=res.data
-        })
+       async mounted(){
+                 try {
+                    const response= await apolloClient.query({
+                    query: gql`query ($resourceName:String!) {
+                        getPermission(resourceName:$resourceName){
+                            read
+                            write
+                            update
+                            delete
+                        }
+                    }`,
+                    // Parameters
+                    variables: {
+                        resourceName:'Posts'
+                    },
+                    })
+                    if(response&&response.data){
+                         this.permissions=response.data.getPermission
+                    }
+                }catch (error) {
+                    //  this.error=error.message.split(': ')[1];
+                    console.log(error)
+                }
     },
     methods: {
             // delete user post
-            deletePost(id){
-                let apiURL = `post/delete-post/${id}`;
-                let indexOfArrayItem = this.pageOfItems.findIndex(i => i.id === id);
+           async deletePost(pid){
+                try {
+                this.$store.commit('setLoading',true)
+                let indexOfArrayItem = this.pageOfItems.findIndex(i => i.id === pid);
 
                 if (window.confirm("Do you really want to delete?")) {
-                    jwtInterceptor.delete(apiURL).then(() => {
-                        this.pageOfItems.splice(indexOfArrayItem, 1);
-                    }).catch(error => {
-                        console.log(error)
-                    });
+                    const response= await apolloClient.mutate({
+                
+                    mutation: gql`mutation ($id:String!) {
+                        deletePost(id:$id)
+                    }`,
+                    // Parameters
+                    variables: {
+                        id:pid
+                    },
+                    })
+                    if(response&&response.data){
+                    this.$store.commit('setLoading',false)
+                        var pageOfItems=this.pageOfItems
+                        pageOfItems.splice(indexOfArrayItem, 1)
+                        this.pageOfItems=pageOfItems
+                    }
+                } 
+                }catch (error) {
+                    this.$store.commit('setLoading',false)
+                    //  this.error=error.message.split(': ')[1];
+                    console.log(error)
                 }
             },
           }

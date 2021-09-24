@@ -1,17 +1,7 @@
 import { gql } from "apollo-server-core"
-
- const typeDefs=gql`
-   type Query{
-     hello:String!
-      logout:String!
-      getPostForEdit(id:String!):Post!
-      getUserForEdit(id:String!):GetUser!
-      getPermission(resourceName:String!):Permission!
-      getUsers(page:Int!):[String!]!
-      getUserPost(page:Int!):String!
-      getPost(page:Int!):String!
-    }
-   input RegisterInput{
+  
+ const AuthType=gql`
+ input RegisterInput{
       name:String!
       email:String!
       password:String!
@@ -27,21 +17,23 @@ import { gql } from "apollo-server-core"
     roleId:String!
     userId:String!
    }
-   type User{
+   type RefsToken{
+     accToken:String!
+     refToken:String!
+   }
+ `
+ const UserType=gql`
+  type User{
      id:String!
      name:String!
      email:String!
      password:String!
-     roleId:String!
+     roleId:String
    }
    type GetUser{
     name:String!
     email:String!
     password:String!
-   }
-   type RefsToken{
-     accToken:String!
-     refToken:String!
    }
    input UpdateUserInput{
       id:String!
@@ -49,9 +41,10 @@ import { gql } from "apollo-server-core"
       email:String
       password:String
    }
-   type Post{
-    title:String!
-    discription:String!
+   type AllUser{
+      currentpage:Int
+      totalpages:Int
+      pageOfItems:[User]
    }
    type Permission{
      read:Boolean!
@@ -59,6 +52,32 @@ import { gql } from "apollo-server-core"
      update:Boolean!
      delete:Boolean!
    }
+ `
+  const PostType=gql`
+    type Post{
+    id:String
+    title:String!
+    discription:String!
+   }
+   type AllUserPost{
+    currentpage:Int
+    totalpages:Int
+    pageOfItems:[Post]
+   }
+  `
+
+ const typeDefs=gql`
+    ${AuthType}
+    ${UserType}
+    ${PostType}
+   type Query{
+      getPostForEdit(id:String!):Post!
+      getUserForEdit(id:String!):GetUser!
+      getPermission(resourceName:String!):Permission!
+      getUsers(page:Int!):AllUser
+      getUserPost(page:Int!,userId:String!):AllUserPost
+      getPost(page:Int!):AllUserPost
+    }
    type Mutation{
      register(registerInput:RegisterInput):User!
      login(loginInput:LoginInput):LoginUser!
@@ -68,7 +87,7 @@ import { gql } from "apollo-server-core"
      addUser(registerInput:RegisterInput):User!
      deleteUser(id:String!):String!
      updateUser(updateUserInput:UpdateUserInput):String!
-     addPost(title:String!,discription:String!):Post!
+     addPost(title:String!,discription:String!,userId:String!):String!
      deletePost(id:String!):String!
      updatePost(id:String!,title:String!,discription:String!):String!
    }

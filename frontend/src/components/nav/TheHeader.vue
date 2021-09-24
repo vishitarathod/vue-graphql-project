@@ -12,10 +12,10 @@
           <router-link v-if="!isAuthenticated" to="/login">Login</router-link>
         </li>
          <li>
-         <router-link v-if="isAuthenticated&&roles==='b3963d93-175b-409e-8eaa-c4af1a41373b'"  to="/users">Users</router-link>
+         <router-link v-if="isAuthenticated&&roles==='6c1f0d1a-23ac-4a9a-ab5c-f68ed0d46e39'"  to="/users">Users</router-link>
         </li>
          <li>
-         <router-link v-if="isAuthenticated&&roles==='b3963d93-175b-409e-8eaa-c4af1a41373b'" to="/post">Posts</router-link>
+         <router-link v-if="isAuthenticated&&roles==='6c1f0d1a-23ac-4a9a-ab5c-f68ed0d46e39'" to="/post">Posts</router-link>
         </li>
         <li>
          <router-link v-if="!isLogout"  to="/logout">Logout</router-link>
@@ -27,9 +27,7 @@
 
 
 <script>
-// import Button from '../base/Button.vue';
 export default {
-  // components: { Button },
   data(){
     return{
       roles:localStorage.getItem("roleId"),
@@ -37,7 +35,6 @@ export default {
     }
   },
   mounted() {
-    console.log(this.$store.state.logOut);
     if(localStorage.getItem("isAuthenticated")== "true") {
        this.isAuthenticated = true;
      this.$store.commit('setLogout',false)

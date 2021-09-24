@@ -5,20 +5,11 @@ import { mailSend } from '../helper/mail.js'
 import validate from '../validation/validate.js'
 
 export default{
-    Query:{
-        logout(){
-            return "logout successfully"
-        },
-        hello(){
-            return "hellllooooo....... welcome....."
-        }
-    },
     Mutation:{
         //user registration
        async register(parent,{registerInput:{name,email,password,roleName}},{prisma},info){
           //validate data
           const data= await validate.validateRegisterUser(name,email,password,roleName)
-        //   console.log(data);
            try {
             //cheack for email is alreday register or not
             const isEmailExist= await prisma.user.findFirst({
@@ -96,12 +87,11 @@ export default{
             }
         },
         //forgot password
-        async forgotPassword(parent,{email},{prisma},info){
+        async forgotPassword(parent,{email},context,info){
             //verify token
-            const data= await verifyAccessToken(context)
             try {
             //cheack for email is register or not
-            const isUserExist= await prisma.user.findFirst({
+            const isUserExist= await context.prisma.user.findFirst({
                 where:{
                     email
                 }
@@ -124,11 +114,10 @@ export default{
         //reset password
         async resetPassword(parent,{token,password},{prisma},info){
             //verify token
-            const data= await verifyAccessToken(context)
             try {
                 //check for valid user
                 const user=await decodeToken(token)
-                password= password=await bcrypt.hash(password,10);
+              password=await bcrypt.hash(password,10);
 
                 //update password with new password
                 const updateUser = await prisma.user.update({

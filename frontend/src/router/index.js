@@ -67,8 +67,7 @@ let routes=[
     },
 ]
 
-export const router=new VueRouter({
-    base: 'public', 
+ const router=new VueRouter({
     mode: 'history',
     routes
     
@@ -82,3 +81,4 @@ export const router=new VueRouter({
 //         next()
 //     }
 // })
+export default router

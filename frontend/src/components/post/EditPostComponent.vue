@@ -9,17 +9,16 @@
     <label for="discription"><b>Discription</b></label>
     <input type="text" v-model="post.discription" required>
 
-    <!-- <button type="button"  @click="handleUpdateForm()">Update</button> -->
-    <base-button @click.prevent="handleUpdateForm()">Update</base-button>
+    <button type="button"  @click.prevent="handleUpdateForm()">Update</button>
+    <!-- <base-button @click.prevent="handleUpdateForm()">Update</base-button> -->
 </form>
 
   </div>
 </template>
 
 <script>
-// import axios from "axios";
-import jwtInterceptor from '../../shared/jwt.interceptor'
-// import {mapMutations} from "vuex";
+import gql from 'graphql-tag'
+import {apolloClient} from '../../vue-apollo'
 export default {
     data() {
         return {
@@ -30,32 +29,55 @@ export default {
         }
     },
     //get post which we have to edit
-    created() {
-        let apiURL = `post/edit-post/${this.$route.params.id}`;
-
-        jwtInterceptor.get(apiURL).then((res) => {
-            this.post = res.data;
-            console.log(this.post)
+   async created() {
+         try {
+        const response= await apolloClient.query({
+    
+          query: gql`query ($id:String!) {
+              getPostForEdit(id:$id)
+              {  
+                      title
+                      discription 
+              }
+          }`,
+          // Parameters
+          variables: {
+            id:this.$route.params.id
+          },
         })
+        if(response&&response.data){
+           this.post = response.data.getPostForEdit
+        }
+      } catch (error) {
+        //  this.error=error.message.split(': ')[1];
+        console.log(error)
+      }
     }, 
     methods: {
-    //         ...mapMutations("auth", {
-    //   setLoading: "setLoading",
-    
-    // }),
         //update post
-        handleUpdateForm() {
-             this.$store.commit('setLoading',true)
-            let apiURL = `post/update-post/${this.$route.params.id}`;
-             
-            jwtInterceptor.put(apiURL, this.post).then((res) => {
-                console.log(res)
-            this.$store.commit('setLoading',false)
-               this.$router.push('/userpost')
-            }).catch(error => {
-               this.$store.commit('setLoading',false)
-                console.log(error)
-            });
+       async handleUpdateForm() {
+             try {
+                this.$store.commit('setLoading',true)
+                const response= await apolloClient.mutate({
+            
+                mutation: gql`mutation ($id:String!,$title:String!,$discription:String!) {
+                    updatePost(id:$id,title:$title,discription:$discription)
+                }`,
+                // Parameters
+                variables: {
+                    id:this.$route.params.id,
+                    title:this.post.title,
+                    discription:this.post.discription
+                },
+                })
+                if(response&&response.data){
+                this.$store.commit('setLoading',false)
+                    this.$router.push('/userpost')
+                }
+            } catch (error) {
+                this.$store.commit('setLoading',false)
+                //  this.error=error.message.split(': ')[1];
+            }
         }
     }
 }

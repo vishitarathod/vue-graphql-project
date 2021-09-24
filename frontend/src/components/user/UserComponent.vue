@@ -13,7 +13,7 @@
                         <th>id</th>
                         <th>Name</th>
                         <th>Email</th>
-                        <!-- <th>Password</th> -->
+                        <th>Password</th>
                         <th v-if="permissions.update||permissions.delete">action</th>
                     </tr>
                 </thead>
@@ -22,7 +22,7 @@
                         <td>{{ user.id }}</td>
                         <td>{{ user.name }}</td>
                         <td>{{ user.email }}</td>
-                         <!-- <td>{{ user.password }}</td> -->
+                         <td>{{ user.password }}</td>
                         <td >
                             <router-link class="btn btn-danger" v-if="permissions.update" :to="{name: 'edituser', params: { id: user.id }}" ><i class="fa fa-pencil"></i>
                             </router-link> 
@@ -33,11 +33,11 @@
             </table>
             <div v-if="pageOfItems.length!=0"  class="pagination">
                  <!-- <a class="page"><i class="fa fa-angle-left"></i></a> -->
-                <router-link :to="{ query: { page: pager.currentPage - 1 }}" class="page"><i class="fa fa-angle-left"></i></router-link>
+                <router-link :to="{ query: { page: pager.currentpage - 1 }}" class="page"><i class="fa fa-angle-left"></i></router-link>
 
-                <router-link v-for="index in pager.totalPages" :key="index" :to="{ query: { page: index }}" class="page">{{index}}</router-link>
+                <router-link v-for="index in pager.totalpages" :key="index" :to="{ query: { page: index }}" class="page">{{index}}</router-link>
                  <!-- <a class="page"><i class="fa fa-angle-right"></i></a> -->
-                  <router-link :to="{ query: { page: pager.currentPage + 1 }}" class="page"><i class="fa fa-angle-right"></i></router-link>
+                  <router-link :to="{ query: { page: pager.currentpage + 1 }}" class="page"><i class="fa fa-angle-right"></i></router-link>
             </div>
              </div>
             <div v-else>
@@ -51,30 +51,53 @@
 
 <script>
 // import axios from 'axios'
-import jwtInterceptor from '../../shared/jwt.interceptor.js'
+import gql from 'graphql-tag'
+import {apolloClient} from '../../vue-apollo'
 export default {
   data(){
     return{
       permissions:{},
            pager: {},
-            pageOfItems: [],
-            
+            pageOfItems: [],    
     }
   },
   watch: {
         '$route.query.page': {
             immediate: true,
-            handler(page) {
+           async handler(page) {
                 page = parseInt(page) || 1;
-                if (page !== this.pager.currentPage) {
-                    jwtInterceptor.get(`user/users/items?page=${page}`)
-                        .then((response) => {
-                        console.log("userssssssss.........",response);
-                        console.log("meta.........",response.data.meta)
-                         this.pager = response.data.meta
-                            this.pageOfItems = response.data.items
+                if (page !== this.pager.currentpage) {
+
+                     try {
+                        const response= await apolloClient.query({
+                    
+                        query: gql`query ($page:Int!) {
+                            getUsers(page:$page)
+                            {
+                                currentpage
+                                totalpages
+                                pageOfItems{
+                                id
+                                name
+                                email
+                                password
+                                }
                             }
-                        )
+                        }`,
+                        // Parameters
+                        variables: {
+                            page 
+                        },
+                        })
+                        if(response&&response.data){
+                            this.pager = response.data.getUsers
+                            // this.pager = response.data.getUsers.totalpages
+                            this.pageOfItems = response.data.getUsers.pageOfItems
+                        }
+                    } catch (error) {
+                        console.log(error)
+                        //  this.error=error.message.split(': ')[1];
+                    }
                 }
             }
         },
@@ -82,29 +105,62 @@ export default {
             return this.pageOfItems
         }
     },
-    mounted(){
-        jwtInterceptor.get('user/get-permission?resourceName=Users')
-        .then((res)=>{
-            console.log("permissions.......",res.data)
-            this.permissions=res.data
-        })
+      async mounted(){
+                 try {
+                    const response= await apolloClient.query({
+                    query: gql`query ($resourceName:String!) {
+                        getPermission(resourceName:$resourceName){
+                            read
+                            write
+                            update
+                            delete
+                        }
+                    }`,
+                    // Parameters
+                    variables: {
+                        resourceName:'Users'
+                    },
+                    })
+                    if(response&&response.data){
+                         this.permissions=response.data.getPermission
+                    }
+                }catch (error) {
+                    //  this.error=error.message.split(': ')[1];
+                    console.log(error)
+                }
     },
-    
     methods: {
         // delete user
-            deleteUser(id){
-                let apiURL = `user/delete-user/${id}`;
-                let indexOfArrayItem = this.pageOfItems.findIndex(i => i.id === id);
+           async deleteUser(uid){
+               try {
+                this.$store.commit('setLoading',true)
+                let indexOfArrayItem = this.pageOfItems.findIndex(i => i.id === uid);
 
                 if (window.confirm("Do you really want to delete?")) {
-                    jwtInterceptor.delete(apiURL).then(() => {
+                    const response= await apolloClient.mutate({
+                
+                    mutation: gql`mutation ($id:String!) {
+                        deleteUser(id:$id)
+                    }`,
+                    // Parameters
+                    variables: {
+                        id:uid
+                    },
+                    })
+                    if(response&&response.data){
+                    this.$store.commit('setLoading',false)
                         var pageOfItems=this.pageOfItems
                         pageOfItems.splice(indexOfArrayItem, 1)
                         this.pageOfItems=pageOfItems
-                    }).catch(error => {
-                        console.log(error)
-                    });
+                    }
+                } 
+                }catch (error) {
+                    this.$store.commit('setLoading',false)
+                    //  this.error=error.message.split(': ')[1];
+                    console.log(error)
                 }
+                
+                
             },
  },
 }

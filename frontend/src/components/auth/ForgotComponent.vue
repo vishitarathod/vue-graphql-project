@@ -6,14 +6,14 @@
     <input type="text" placeholder="Enter Email" name="email" id="email" v-model.trim="email" required>
 
      <p class="error" v-if="error!=''">{{error}}</p>
-    <!-- <button type="button" @click="submit()">Submit</button> -->
-    <base-button @click.prevent="submit()">Submit</base-button>
+    <button type="button" @click="submit()">Submit</button>
 </form>
   </div>
 </template>
 
 <script>
-import axios from 'axios'
+import gql from 'graphql-tag'
+import {apolloClient} from '../../vue-apollo'
 export default {
     data(){
         return{
@@ -23,19 +23,25 @@ export default {
     },
     methods:{
     async submit(){
-          this.$store.commit('setLoading',true)
-       axios.post('http://localhost:3000/auth/forgot',{
-        email:this.email,
-      }).then((data)=>{
-        this.$store.commit('setLoading',false)
-        console.log(data)
-        this.$router.push(`/reset/`)
-      }).catch((error)=>{
-        this.$store.commit('setLoading',false)
-        console.log(error)
-         console.log(error.response)
-        this.error=error.response.data.error.details[0].message
-      })
+      try {
+        await this.$store.commit('setLoading',true)
+        const response= await apolloClient.mutate({
+          mutation: gql`mutation ($email:String!) {
+               forgotPassword(email:$email)
+          }`,
+          // Parameters
+          variables: {
+            email:this.email
+          },
+        })
+        if(response&&response.data){
+         await this.$store.commit('setLoading',false)
+         return this.$router.push('/reset')
+        }
+      } catch (error) {
+       await this.$store.commit('setLoading',false)
+        this.error=error.message.split(': ')[1];
+      }
       }
     }
 }

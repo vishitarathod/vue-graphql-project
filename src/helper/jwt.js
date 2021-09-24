@@ -79,6 +79,6 @@ export async function decodeToken(token){
     // console.log(data)
     return payload
    } catch (error) {
-       return error
+       throw new Error('invalid token')
    }
 }

@@ -13,7 +13,8 @@
   <p class="error" v-if="error!=''">{{error}}</p>
   
   <div class="router">
-   <base-button @click.prevent="login()">Login</base-button>
+   <!-- <base-button @click.prevent="login()">Login</base-button> -->
+    <button type="button" @click.prevent="login()">Login</button>
   </div>
   <div class="container">
     <p> <router-link to="/forgot">forgot password?</router-link></p>
@@ -45,21 +46,17 @@ export default {
         email: this.email,
         password: this.password,
       };
-
       this.$store.dispatch('loginApi',payload)
      .then(async()=>{
        this.$store.commit('setLoading',false)
-          const getRolesName=localStorage.getItem("roleId")
-          //  console.log("get roles.........",getRolesName)
-        this.$router.push("/register")
-        console.log(this.$store.getters.getLoginApiStatus);
+        const getRolesName=localStorage.getItem("roleId")
+   
        if(this.$store.getters.getLoginApiStatus){
-       await  this.$store.commit('setLoading',false)
-       
-      //  console.log("}}}}}}}}}",this.$store.state.logOut)
-        if(getRolesName==="b3963d93-175b-409e-8eaa-c4af1a41373b"){
+       await this.$store.commit('setLoading',false)
+
+        if(getRolesName==="6c1f0d1a-23ac-4a9a-ab5c-f68ed0d46e39"){
             this.$router.push("/users")
-        }else if(getRolesName==="d8eece8e-315e-40f9-9da7-19d5c7a23121"){
+        }else if(getRolesName==="3226d1a8-4cfa-4fcc-a34a-b08841a96d40"){
            this.$router.push("/users")
         }else{
           this.$router.push("/userpost")
@@ -69,8 +66,6 @@ export default {
       }
      }).catch((error)=>{
        this.$store.commit('setLoading',false)
-        console.log("++++++++++++++++++")
-        console.log(error.response)
         this.error=error
       })
      

@@ -6,7 +6,7 @@ export default {
         //get perticular post for edit
         async getUserForEdit(parent,{id},context,info){
             //verify token
-            const data= await verifyAccessToken(context)
+            // const data= await verifyAccessToken(context)
             try {
               const user = await context.prisma.user.findUnique({
                 where: {
@@ -67,7 +67,7 @@ export default {
         //get users which have user role
        async getUsers(parent,{page},context,info){
           //verify token
-          const data= await verifyAccessToken(context)
+          // const data= await verifyAccessToken(context)
          try {
           const items = await context.prisma.user.findMany({
             where: {
@@ -78,15 +78,18 @@ export default {
           const page1 = parseInt(page) || 1;
         
           // get pager object for specified page
-          const pageSize = 4;
+          const pageSize = 2;
           const pager = paginate(items.length, page1, pageSize);
-        console.log(pager)
+
           // get page of items from items array
           const pageOfItems = items.slice(pager.startIndex, pager.endIndex + 1);
-          console.log(pageOfItems)
+
+          const currentpage=pager.currentPage
+          const totalpages=pager.totalPages
           // return pager object and current page of items
-          return { pager, pageOfItems };
+          return { currentpage, totalpages, pageOfItems };
          } catch (error) {
+  
            return error
          }
           
@@ -109,17 +112,6 @@ export default {
 
             //hashed password
             password=await bcrypt.hash(password,10);
-
-            //find role id for given role name
-            const roleid=  await context.prisma.role.findFirst({
-                where: {
-                  roleName,
-                },
-                select: {
-                    id: true,
-                  },
-              })
-              roleName=roleid.id;
 
             //save user in database  
             const savedUser=  await context.prisma.user.create({
@@ -161,7 +153,6 @@ export default {
           //verify token
           const data= await verifyAccessToken(context);
             try {
-              console.log(context.userId);
                 const updateUser = await context.prisma.user.update({
                     where: {
                       id, 

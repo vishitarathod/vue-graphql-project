@@ -1,10 +1,11 @@
-import { verifyAccessToken} from '../helper/jwt.js'
+// import { verifyAccessToken} from '../helper/jwt.js'
+import paginate from 'jw-paginate';
 export default{
     Query:{
         //get perticular post for edit
         async getPostForEdit(parent,{id},context,info){
             //verify token
-            const data= await verifyAccessToken(context)
+            // const data= await verifyAccessToken(context)
             try {
               const post = await context.prisma.post.findUnique({
                 where: {
@@ -23,13 +24,13 @@ export default{
         },
 
         //get post for perticular user
-        async getUserPost(parent,{page},context,info){
+        async getUserPost(parent,{page,userId},context,info){
           //verify token
-          const data= await verifyAccessToken(context);
+          // const data= await verifyAccessToken(context);
           try {
             const items = await context.prisma.post.findMany({
               where: {
-                  userId: data.aud
+                  userId
               },
             })
             // get page from query params or default to first page
@@ -41,9 +42,11 @@ export default{
             
             // get page of items from items array
             const pageOfItems = items.slice(pager.startIndex, pager.endIndex + 1);
-            console.log(pageOfItems)
             // return pager object and current page of items
-            return { pager, pageOfItems };
+            const currentpage=pager.currentPage
+            const totalpages=pager.totalPages
+            // return pager object and current page of items
+            return { currentpage, totalpages, pageOfItems };
           } catch (error) {
             return error
           }  
@@ -51,7 +54,7 @@ export default{
         //get total post
         async getPost(parent,{page},context,info){
           //verify token
-          const data= await verifyAccessToken(context);
+          // const data= await verifyAccessToken(context);
           try {
             const items = await context.prisma.post.findMany()
             // get page from query params or default to first page
@@ -62,9 +65,12 @@ export default{
             const pager = paginate(items.length, page1, pageSize);
             // get page of items from items array
             const pageOfItems = items.slice(pager.startIndex, pager.endIndex + 1);
-            console.log(pageOfItems)
+
             // return pager object and current page of items
-            return res.json({ pager, pageOfItems });
+            const currentpage=pager.currentPage
+            const totalpages=pager.totalPages
+            // return pager object and current page of items
+            return { currentpage, totalpages, pageOfItems };
           } catch (error) {
             return error
           }
@@ -73,20 +79,20 @@ export default{
     },
     Mutation:{
         // add post 
-        async addPost(parent,{title,discription},context,info){
+        async addPost(parent,{title,discription,userId},context,info){
         //verify token
-          const data= await verifyAccessToken(context);
-          console.log(data.aud);
+          // const data= await verifyAccessToken(context);
+          // console.log(data.aud);
           try {
             //save post
             const savedPost = await context.prisma.post.create({
                 data: {
-                  userId:data.aud,
+                  userId,
                   title,
                   discription
                 },
               })
-              return savedPost
+              return "post added successfully"
           } catch (error) {
               return error
           }
@@ -94,7 +100,7 @@ export default{
         //delete post by id
        async deletePost(parent,{id},context,info){
             //verify token
-            const data= await verifyAccessToken(context);
+            // const data= await verifyAccessToken(context);
             try {
              const deletedUser = await context.prisma.post.delete({
                  where: {
@@ -109,7 +115,7 @@ export default{
          //update post by id
          async updatePost(parent,{id,title,discription},context,info){
             //verify token
-            const data= await verifyAccessToken(context);
+            // const data= await verifyAccessToken(context);
               try {
                   const updateUser = await context.prisma.post.update({
                       where: {
