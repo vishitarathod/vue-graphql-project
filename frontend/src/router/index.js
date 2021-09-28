@@ -73,12 +73,12 @@ let routes=[
     
 },
 );
-// router.beforeEach((to,from,next) => {
-//     let isAuthenticated = localStorage.getItem("isAuthenticated");
-//     if(to.meta.requiredAuth&&!isAuthenticated){
-//         next('/login')
-//     }else{
-//         next()
-//     }
-// })
+router.beforeEach((to,from,next) => {
+    let isAuthenticated = localStorage.getItem("isAuthenticated");
+    if(to.meta.requiredAuth&&!isAuthenticated){
+        next('/login')
+    }else{
+        next()
+    }
+})
 export default router

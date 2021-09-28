@@ -19,7 +19,6 @@
                 </div>
                  <p class="error" v-if="error!=''">{{error}}</p>
                 <div class="form-group">
-                    <!-- <button class="btn btn-danger btn-block">Add</button> -->
                     <button @click.prevent="handleAddUserForm()">Add</button>
                 </div>
             </form>

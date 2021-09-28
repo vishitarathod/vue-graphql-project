@@ -1,12 +1,10 @@
 import bcrypt from 'bcrypt'
-import { verifyAccessToken} from '../helper/jwt.js'
+// import { verifyAccessToken} from '../helper/jwt.js'
 import paginate from 'jw-paginate';
 export default {
       Query:{
         //get perticular post for edit
         async getUserForEdit(parent,{id},context,info){
-            //verify token
-            // const data= await verifyAccessToken(context)
             try {
               const user = await context.prisma.user.findUnique({
                 where: {
@@ -25,13 +23,11 @@ export default {
           
         },
         //get permission 
-        async getPermission(parent,{resourceName},context,info){
-          //verify token
-          const data= await verifyAccessToken(context);
+        async getPermission(parent,{resourceName,userId},context,info){
           try {
             const user=await context.prisma.user.findFirst({
               where:{
-                id:data.aud
+                id:userId
             },
             select:{
               roleId:true
@@ -66,8 +62,6 @@ export default {
 
         //get users which have user role
        async getUsers(parent,{page},context,info){
-          //verify token
-          // const data= await verifyAccessToken(context)
          try {
           const items = await context.prisma.user.findMany({
             where: {
@@ -97,8 +91,6 @@ export default {
     },
     Mutation:{
        async addUser(parent,{registerInput:{name,email,password,roleName}},context,info){
-        //verify token
-        // const data= await verifyAccessToken(context)
         try {
             //cheack for email is alreday register or not
             const isEmailExist= await context.prisma.user.findFirst({
@@ -130,11 +122,7 @@ export default {
 
         //delete user by id
        async deleteUser(parent,{id},context,info){
-        //verify token
-        // const data= await verifyAccessToken(context);
            try {
-             console.log("__________________")
-            console.log(context.userId);
             const deletedUser = await context.prisma.user.delete({
                 where: {
                   id,
@@ -150,8 +138,6 @@ export default {
 
         //update user by id
         async updateUser(parent,{updateUserInput:{id,name,email,password}},context,info){
-          //verify token
-          const data= await verifyAccessToken(context);
             try {
                 const updateUser = await context.prisma.user.update({
                     where: {

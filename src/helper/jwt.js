@@ -1,12 +1,12 @@
 import JWT from 'jsonwebtoken'
-
+import { ApolloError } from 'apollo-server-errors';
 //generate access token
 export function signAccessToken(userId) {
     return new Promise((resolve, reject) => {
         const payload={}
         const secret = process.env.secret;
         const option = {
-            expiresIn: '15m',
+            expiresIn: '20s',
             audience:userId
         };
         //generate token
@@ -18,27 +18,6 @@ export function signAccessToken(userId) {
             resolve(token);
         });
     });
-}
-
-//verify access token
-export async function verifyAccessToken (context) {
-    const header = context.req.headers.authorization
-
-    // console.log(header)
-    if (header) {
-    const token = header.split('Bearer ')[1];
-    if(token){
-        try {
-            const decoded = JWT.verify(token, process.env.secret)
-            return decoded
-        } catch (error) {
-            throw new Error('Invalid/Expired token')
-        }
-     }
-        throw new Error('Authentication required')
-    }
-
-    throw new Error('Authentication header must be provided')
 }
 
 //generate refresh token
@@ -64,8 +43,9 @@ export function signReferesToken(userId) {
 //verify refresh token
 export async function veifyRefreshToken(token){
     try {
+        // console.log("token+++++",token)
      const payload= await JWT.verify(token,process.env.secretRef)
-     // console.log(data)
+    //  console.log(payload)
      return payload.aud
     } catch (error) {
         return error

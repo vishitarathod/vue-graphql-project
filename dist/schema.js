@@ -1,6 +1,13 @@
-import { gql } from "apollo-server-core"
-  
- const AuthType=gql`
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _apolloServerCore = require("apollo-server-core");
+
+const AuthType = (0, _apolloServerCore.gql)`
  input RegisterInput{
       name:String!
       email:String!
@@ -21,8 +28,8 @@ import { gql } from "apollo-server-core"
      accToken:String!
      refToken:String!
    }
- `
- const UserType=gql`
+ `;
+const UserType = (0, _apolloServerCore.gql)`
   type User{
      id:String!
      name:String!
@@ -52,8 +59,8 @@ import { gql } from "apollo-server-core"
      update:Boolean!
      delete:Boolean!
    }
- `
-  const PostType=gql`
+ `;
+const PostType = (0, _apolloServerCore.gql)`
     type Post{
     id:String
     title:String!
@@ -64,9 +71,8 @@ import { gql } from "apollo-server-core"
     totalpages:Int
     pageOfItems:[Post]
    }
-  `
-
- const typeDefs=gql`
+  `;
+const typeDefs = (0, _apolloServerCore.gql)`
     ${AuthType}
     ${UserType}
     ${PostType}
@@ -91,5 +97,6 @@ import { gql } from "apollo-server-core"
      deletePost(id:String!):String!
      updatePost(id:String!,title:String!,discription:String!):String!
    }
- `
- export default typeDefs
+ `;
+var _default = typeDefs;
+exports.default = _default;

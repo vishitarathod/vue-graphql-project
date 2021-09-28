@@ -136,16 +136,16 @@ export default{
 
         //refreshtoken validation and generate new tokens
        async refreshToken(parent,{token},context,info){
-           //verify token
-            const data= await verifyAccessToken(context)
+
             try {
-                //verify refresh token
+                // verify refresh token
                 const userId=await veifyRefreshToken(token)
                 //generate new access token
+                console.log(userId)
                 const accToken=await signAccessToken(userId);
                 //generate new refresh token
                 const refToken=await signReferesToken(userId)
-          
+                // throw new Error("not valid")
                 return {accToken,refToken}
             } catch (error) {
                 return error

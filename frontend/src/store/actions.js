@@ -5,7 +5,7 @@ export default{
     async registerApi({commit}, payload) {
       try {
         const response= await apolloClient.mutate({
-          // Query
+    
           mutation: gql`mutation ($registerInput: RegisterInput) {
               register(registerInput:$registerInput)
               {
@@ -38,7 +38,7 @@ export default{
     async loginApi({commit}, payload) {
       try{
         const response= await apolloClient.mutate({
-          // Query
+    
           mutation: gql`mutation ($loginInput: LoginInput) {
               login(loginInput:$loginInput)
               {

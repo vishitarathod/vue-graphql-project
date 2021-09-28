@@ -4,8 +4,6 @@ export default{
     Query:{
         //get perticular post for edit
         async getPostForEdit(parent,{id},context,info){
-            //verify token
-            // const data= await verifyAccessToken(context)
             try {
               const post = await context.prisma.post.findUnique({
                 where: {
@@ -25,8 +23,6 @@ export default{
 
         //get post for perticular user
         async getUserPost(parent,{page,userId},context,info){
-          //verify token
-          // const data= await verifyAccessToken(context);
           try {
             const items = await context.prisma.post.findMany({
               where: {
@@ -53,8 +49,6 @@ export default{
        },
         //get total post
         async getPost(parent,{page},context,info){
-          //verify token
-          // const data= await verifyAccessToken(context);
           try {
             const items = await context.prisma.post.findMany()
             // get page from query params or default to first page
@@ -80,9 +74,6 @@ export default{
     Mutation:{
         // add post 
         async addPost(parent,{title,discription,userId},context,info){
-        //verify token
-          // const data= await verifyAccessToken(context);
-          // console.log(data.aud);
           try {
             //save post
             const savedPost = await context.prisma.post.create({
@@ -99,8 +90,6 @@ export default{
         },
         //delete post by id
        async deletePost(parent,{id},context,info){
-            //verify token
-            // const data= await verifyAccessToken(context);
             try {
              const deletedUser = await context.prisma.post.delete({
                  where: {
@@ -114,8 +103,6 @@ export default{
         },
          //update post by id
          async updatePost(parent,{id,title,discription},context,info){
-            //verify token
-            // const data= await verifyAccessToken(context);
               try {
                   const updateUser = await context.prisma.post.update({
                       where: {

@@ -99,9 +99,10 @@ export default {
     },
        async mounted(){
                  try {
+                    const userId=localStorage.getItem('userId')
                     const response= await apolloClient.query({
-                    query: gql`query ($resourceName:String!) {
-                        getPermission(resourceName:$resourceName){
+                    query: gql`query ($resourceName:String!,$userId:String!) {
+                        getPermission(resourceName:$resourceName,userId:$userId){
                             read
                             write
                             update
@@ -110,7 +111,8 @@ export default {
                     }`,
                     // Parameters
                     variables: {
-                        resourceName:'Posts'
+                        resourceName:'Posts',
+                        userId
                     },
                     })
                     if(response&&response.data){
